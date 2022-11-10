@@ -116,9 +116,12 @@ def login():
 
 @app.route("/logout")
 def logout():
-    g.user = None
+    if g.user == None:
+        flash("No one is signed in")
+    else:
+        flash("Logout Successful")
+        g.user = None
     session['user_uni'] = None
-    flash("Logout Successful")
     return redirect(url_for('index'))
 
 @app.route('/dashboard', methods=['GET','POST'])

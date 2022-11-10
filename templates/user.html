@@ -21,6 +21,19 @@
   </div>
   <br/><br/>
 
+    <!-- May have many saved doctors. This iterates over each doctor. -->
+    <h3>Saved Doctors</h3>
+    <br/>
+    <div>
+      {% for rev in saved %}
+          <div>
+            <li><a href="\doctors\{{rev['npi']}}">{{ rev['first_name'] }}  {{ rev['last_name'] }}</a></li>
+          </div>
+          <br/>
+      {% endfor %}
+    </div>
+    <br/><br/>
+
   <!-- May have many appointments. This iterates over each appointment. -->
   <h3>Appointments</h3>
   <br/>

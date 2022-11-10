@@ -2,6 +2,10 @@
 To run locally:
     python3 server.py
 Go to http://localhost:8111 in your browser.
+
+References (code taken from online sites):
+Login/Authentication: https://github.com/PrettyPrinted/youtube_video_code/blob/master/2020/02/10/Creating%20a%20Login%20Page%20in%20Flask%20Using%20Sessions/flask_session_example/app.py
+
 """
 
 import os
@@ -83,23 +87,6 @@ def about():
 
 @app.route('/login', methods=['GET','POST'])
 def login():
-    # form = LoginForm()
-    # if request.method == 'POST':
-    #     session.pop('user_uni', None)
-
-    #     uni = request.form['uni']
-    #     password = request.form['password']
-        
-    #     user = [x for x in all_users if x.uni == uni][0]
-    #     if user and user.password == password:
-    #         session['user_uni'] = user.uni
-    #         url = 'users/' + str(user.uni)
-    #         return redirect(url)
-
-    #     return redirect(url_for('login'))
-
-    # return render_template('login.html', form=form)
-
     form = LoginForm()
     if request.method == 'POST':
         session.pop('user_uni', None)
@@ -126,32 +113,6 @@ def login():
             else:
                 flash("User does not exist")
     return render_template("login.html", form=form)
-
-
-    #### OPTION 2
-
-    # form = LoginForm()
-    # if form.validate_on_submit():
-    #     # Find correct user
-    #     cursor = g.conn.execute("SELECT * FROM studentpatients")
-    #     users = []
-    #     for result in cursor:
-    #         if result['uni'] == form.uni.data:
-    #             users.append(result)
-    #     cursor.close()
-        
-    #     if users:
-    #         user = users[0]
-    #         # Password verification
-    #         if(form.password.data == user['password']):
-    #             flash("Login successful")
-    #             url = 'users/' + str(user.uni)
-    #             return redirect(url)
-    #         else:
-    #             flash("Wrong Password")
-    #     else:
-    #         flash("User does not exist")
-    # return render_template("login.html", form=form)
 
 @app.route("/logout")
 def logout():
@@ -251,6 +212,14 @@ def user(uni):
             user_info.append(result)
     cursor.close()
     
+    # Get specific user + saved doctors
+    cursor = g.conn.execute("SELECT * FROM studentPatients AS S, saves AS V, doctors AS D WHERE S.uni = V.uni AND D.npi=V.npi")
+    saved_doctors = []
+    for result in cursor:
+        if result['uni'] == uni:
+            saved_doctors.append(result)
+    cursor.close()
+
     # Get specific user + reviews
     cursor = g.conn.execute("SELECT * FROM studentPatients AS S, writes AS W, reviews AS R WHERE S.uni = W.uni AND W.review_id=R.review_id")
     user_revs = []
@@ -267,7 +236,7 @@ def user(uni):
             user_apts.append(result)
     cursor.close()
 
-    context = dict(info = user_info[0], reviews = user_revs, appointments = user_apts)
+    context = dict(info = user_info[0], saved = saved_doctors, reviews = user_revs, appointments = user_apts)
     return render_template("user.html", **context)
 
 @app.route('/reviews')

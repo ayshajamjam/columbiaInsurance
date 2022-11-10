@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}All Users{% endblock %}
+
+{% block content %}
+
+    <div class = "container">
+        <h1>All Users</h1>
+      
+        <div>
+          {% for user in data %}
+          <li><a href="/users/{{user['uni']}}">{{ user['first_name'] }}  {{ user['last_name'] }}</a>, {{ user['uni'] }}</li>
+          {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

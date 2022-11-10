@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}User{% endblock %}
+
+{% block content %}
+
+<div class = "container">
+  
+  <div class = "row">
+      <div class = 'col-8'>
+          <h1>{{info['first_name']}} {{info['last_name']}}, {{info['uni']}}</h1>
+          <h3>Age: {{info['age']}}</h3>
+          <h3>School: {{info['school']}}</h3>
+      </div>
+  </div>
+  <br/><br/>
+
+  <!-- May have many appointments. This iterates over each appointment. -->
+  <h3>Appointments</h3>
+  <br/>
+  <div>
+    {% for rev in appointments %}
+        <div>
+          <div class="row">
+          <div class="col"><h6>Student UNI: </h6><p>{{rev['uni']}}</p></div>
+          <div class="col"><h6>Doctor: </h6><a href="\doctors\{{rev['npi']}}">{{ rev['first_name'] }}  {{ rev['last_name'] }}</a></div>
+          <div class="col"><h6>Date Scheduled: </h6><p>{{rev['apt_date']}}</p></div>
+          <div class="col"><h6>Time Scheduled: </h6><p>{{rev['apt_time']}}</p></div>
+        </div>
+
+        <h6>Concern Description: </h6><p>{{rev['concern_description']}}</p>
+        <br/>
+    {% endfor %}
+  </div>
+  <br/><br/>
+
+  <!-- May have many reviews. This iterates over each review. -->
+  <h3>Reviews</h3>
+  <br/>
+  <div>
+    {% set count = 0 %}
+    {% for rev in reviews %}
+        {% set count = count + 1 %}
+        <div>
+            <div><a href="\reviews\{{rev['review_id']}}"><h5>Review {{count}}</h5></a></div>
+            <br/>
+            <div class="row">
+            <div class="col"><h6>Student UNI: </h6><p>{{rev['uni']}}</p></div>
+            <div class="col"><h6>Rating: </h6><p>{{rev['rating']}}</p></div>
+            <div class="col"><h6>Date Written: </h6><p>{{rev['date_written']}}</p></div>
+            <div class="col"><h6>Date Visited: </h6><p>{{rev['date_of_visit']}}</p></div>
+            </div>
+
+            <h6>Review: </h6><p>{{rev['content']}}</p>
+            <br/>
+        </div>
+        <br/><br/>
+    {% endfor %}
+  </div>
+
+  <br/><br/>
+</div>
+
+{% endblock %}

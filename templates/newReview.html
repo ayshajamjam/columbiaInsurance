@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}New Review{% endblock %}
+
+{% block content %}
+
+    <div class = "container">
+
+        {% if error_statement %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            {{ error_statement }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        <h1>Write a Review</h1>
+        <br/>
+
+        <form method = "POST">
+            {{ form.hidden_tag() }}
+
+            {{ form.date_of_visit.label(class="form-label") }}
+            {{ form.date_of_visit(class="form-control") }}
+            <br/>
+
+            {{ form.rating.label(class="form-label") }}
+            {{ form.rating(class="form-control") }}
+            <br/>
+
+            {{ form.review_content.label(class="form-label") }}
+            {{ form.review_content(class="form-control") }}
+            <br/>
+
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+
+
+        <!-- <form action="/newReview" method="POST">
+            <div class="mb-3">
+                <label for="date_of_visit" class="form-label">Date of Visit</label>
+                <input type="date" class="form-control" id="date_of_visit" name="date_of_visit" value = "{{date_of_visit}}">
+
+                <label for="rating" class="form-label">Rating (between 1 and 5)</label>
+                <input type="number" class="form-control" id="rating" name="rating" value = "{{rating}}" min="1", max="5">
+
+                <label for="reviewContent" class="form-label">Review</label>
+                <input type="textarea" class="form-control" id="reviewContent" name="review_content" value = "{{review_content}}">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form> -->
+    </div>
+
+{% endblock %}

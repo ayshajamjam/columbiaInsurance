@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}All Reviews{% endblock %}
+
+{% block content %}
+
+    <div class = "container">
+        <h1>All Reviews</h1>
+        <div>{{ data }}</div>
+      
+        <div>
+          {% for n in data %}
+          <ul>{{ n }}</ul>
+          {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

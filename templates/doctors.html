@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Doctors{% endblock %}
+
+{% block content %}
+
+    <div class = "container">
+        <h1>Doctors</h1>
+      
+        <div>
+          {% for doc in data %}
+          <li><a href="/doctors/{{doc['npi']}}">{{ doc['first_name'] }}  {{ doc['last_name'] }}</a>, {{ doc['job_title'] }}</li>
+          {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

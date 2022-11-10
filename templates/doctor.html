@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Doctor{% endblock %}
+
+{% block content %}
+
+    <div class = "container">
+        <div class = "row">
+            <div class = 'col-8'>
+                <h1>{{info['first_name']}} {{info['last_name']}}, {{info['avg_rating']}}</h1>
+                <h3>{{info['job_title']}}, {{info['degree']}} </h3>
+            </div>
+            <div class = 'col'>
+                <br/>
+                <button type="button" class="btn btn-outline-primary">Save</button>
+                <button type="button" class="btn btn-outline-primary">Book Appointment</button>
+                <a href="/newReview/{{info['npi']}}"><button type="button" class="btn btn-outline-primary">Review</button></a>
+            </div>
+        </div>
+        <br/>
+        <img src= "{{info['photo_link']}}" >
+        <br/><br/>
+        <p>{{info['about']}}</p>
+
+        <h6>Medical University: {{info['med_university']}}</h6>
+        <h6>NPI Number: {{info['npi']}}</h6>
+        <br/>
+        <h6>Contact Number: {{info['contactno']}}</h6>
+        <br/><br/>
+
+        <!-- May have many reviews. This iterates over each review. Original database has 1 review per doctor -->
+        <div>
+            {% set count = 0 %}
+            {% for rev in reviews %}
+                {% set count = count + 1 %}
+                <div>
+                    <div><a href="\reviews\{{rev['review_id']}}"><h5>Review {{count}}</h5></a></div>
+                    <div class="row">
+                    <div class="col"><h6>Student UNI: </h6><p>{{rev['uni']}}</p></div>
+                    <div class="col"><h6>Rating: </h6><p>{{rev['rating']}}</p></div>
+                    <div class="col"><h6>Date Written: </h6><p>{{rev['date_written']}}</p></div>
+                    <div class="col"><h6>Date Visited: </h6><p>{{rev['date_of_visit']}}</p></div>
+                    </div>
+        
+                    <h6>Review: </h6><p>{{rev['content']}}</p>
+                    <br/>
+                </div>
+                <br/><br/>
+            {% endfor %}
+        </div>
+    </div>
+
+  </div>
+  
+{% endblock %}

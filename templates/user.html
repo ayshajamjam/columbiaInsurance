@@ -36,26 +36,31 @@
   <!-- May have many reviews. This iterates over each review. -->
   <h3>Reviews</h3>
   <br/>
-  <div>
-    {% set count = 0 %}
-    {% for rev in reviews %}
-        {% set count = count + 1 %}
-        <div>
-            <div><a href="\reviews\{{rev['review_id']}}"><h5>Review {{count}}</h5></a></div>
-            <br/>
-            <div class="row">
-            <div class="col"><h6>Student UNI: </h6><p>{{rev['uni']}}</p></div>
-            <div class="col"><h6>Rating: </h6><p>{{rev['rating']}}</p></div>
-            <div class="col"><h6>Date Written: </h6><p>{{rev['date_written']}}</p></div>
-            <div class="col"><h6>Date Visited: </h6><p>{{rev['date_of_visit']}}</p></div>
-            </div>
+  
+    <div>
+      {% if reviews %}
+        {% set count = 0 %}
+        {% for rev in reviews %}
+            {% set count = count + 1 %}
+            <div>
+                <div><a href="\reviews\{{rev['review_id']}}"><h5>Review {{count}}</h5></a></div>
+                <br/>
+                <div class="row">
+                <div class="col"><h6>Student UNI: </h6><p>{{rev['uni']}}</p></div>
+                <div class="col"><h6>Rating: </h6><p>{{rev['rating']}}</p></div>
+                <div class="col"><h6>Date Written: </h6><p>{{rev['date_written']}}</p></div>
+                <div class="col"><h6>Date Visited: </h6><p>{{rev['date_of_visit']}}</p></div>
+                </div>
 
-            <h6>Review: </h6><p>{{rev['content']}}</p>
-            <br/>
-        </div>
-        <br/><br/>
-    {% endfor %}
-  </div>
+                <h6>Review: </h6><p>{{rev['content']}}</p>
+                <br/>
+            </div>
+            <br/><br/>
+        {% endfor %}
+      {% else %}
+          <p>Remember to leave a review for a doctor if you've seen one!</p>
+      {% endif %}
+    </div>
 
   <br/><br/>
 </div>

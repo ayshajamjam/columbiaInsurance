@@ -7,12 +7,12 @@ Go to http://localhost:8111 in your browser.
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response, flash, url_for
+from flask import Flask, request, render_template, g, redirect, Response, flash, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField, IntegerField, DateField, TextAreaField
 from wtforms.validators import DataRequired, NumberRange
-from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
+# from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
 # Create a Flask Instance
 app = Flask(__name__)
@@ -20,21 +20,6 @@ app.config['SECRET_KEY'] = 'databases'
 
 DATABASEURI = "postgresql://aj2604:316@34.75.94.195/proj1part2"
 engine = create_engine(DATABASEURI)
-
-# Flask Login
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-
-@login_manager.user_loader
-def load_user(uni):
-    cursor = g.conn.execute("SELECT * FROM studentpatients")
-    user = []
-    for result in cursor:
-        if result['uni'] == uni:
-            user.append(result)
-    cursor.close()
-    return user
 
 # Create a Form Class
 class NewUserForm(FlaskForm):
@@ -55,11 +40,23 @@ class NewReviewForm(FlaskForm):
     review_content = TextAreaField("Review Content", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
+all_users = []
+
 # Runs at beginning of every web request; sets up db connection
 @app.before_request
 def before_request():
   try:
     g.conn = engine.connect()
+    cursor = g.conn.execute("SELECT * FROM studentPatients")
+    for result in cursor:
+        all_users.append(result)
+    cursor.close()
+
+    g.user = None
+    if session['user_uni']:
+        user = [x for x in all_users if x.uni == session['user_uni']][0]
+        g.user = user
+
   except:
     print("uh oh, problem connecting to database")
     import traceback; traceback.print_exc()
@@ -86,34 +83,86 @@ def about():
 
 @app.route('/login', methods=['GET','POST'])
 def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        cursor = g.conn.execute("SELECT * FROM studentpatients")
-        users = []
-        for result in cursor:
-            if result['uni'] == form.uni.data:
-                users.append(result)
-        cursor.close()
+    # form = LoginForm()
+    # if request.method == 'POST':
+    #     session.pop('user_uni', None)
+
+    #     uni = request.form['uni']
+    #     password = request.form['password']
         
-        if users:
-            user = users[0]
-            if(form.password.data == user['password']):
-                login_user(user, force = True)
-                flash("Login successful")
-                return redirect(url_for('dashboard'))
+    #     user = [x for x in all_users if x.uni == uni][0]
+    #     if user and user.password == password:
+    #         session['user_uni'] = user.uni
+    #         url = 'users/' + str(user.uni)
+    #         return redirect(url)
+
+    #     return redirect(url_for('login'))
+
+    # return render_template('login.html', form=form)
+
+    form = LoginForm()
+    if request.method == 'POST':
+        session.pop('user_uni', None)
+
+        if form.validate_on_submit():
+            # Find correct user
+            cursor = g.conn.execute("SELECT * FROM studentpatients")
+            users = []
+            for result in cursor:
+                if result['uni'] == form.uni.data:
+                    users.append(result)
+            cursor.close()
+            
+            if users:
+                user = users[0]
+                # Password verification
+                if(form.password.data == user['password']):
+                    flash("Login successful")
+                    session['user_uni'] = user.uni
+                    url = 'users/' + str(user.uni)
+                    return redirect(url)
+                else:
+                    flash("Wrong Password")
             else:
-                flash("Wrong Password")
-        else:
-            flash("User does not exist")
+                flash("User does not exist")
     return render_template("login.html", form=form)
 
+
+    #### OPTION 2
+
+    # form = LoginForm()
+    # if form.validate_on_submit():
+    #     # Find correct user
+    #     cursor = g.conn.execute("SELECT * FROM studentpatients")
+    #     users = []
+    #     for result in cursor:
+    #         if result['uni'] == form.uni.data:
+    #             users.append(result)
+    #     cursor.close()
+        
+    #     if users:
+    #         user = users[0]
+    #         # Password verification
+    #         if(form.password.data == user['password']):
+    #             flash("Login successful")
+    #             url = 'users/' + str(user.uni)
+    #             return redirect(url)
+    #         else:
+    #             flash("Wrong Password")
+    #     else:
+    #         flash("User does not exist")
+    # return render_template("login.html", form=form)
+
+@app.route("/logout")
+def logout():
+    g.user = None
+    session['user_uni'] = None
+    flash("Logout Successful")
+    return redirect(url_for('index'))
+
 @app.route('/dashboard', methods=['GET','POST'])
-@login_required
 def dashboard():
     return render_template("dashboard.html")
-
-
-##### IGNORE FOR NOW
 
 @app.route('/newUser', methods=['GET','POST'])
 def newUser():
@@ -190,6 +239,9 @@ def users():
 
 @app.route('/users/<uni>')
 def user(uni):
+    if not g.user or g.user.uni != uni:
+        flash("You do not have access to other students' profiles")
+        return redirect(url_for('users'))
 
     # Get only user information
     cursor = g.conn.execute("SELECT * FROM studentPatients")

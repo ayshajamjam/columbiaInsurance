@@ -29,6 +29,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField, IntegerField, DateField, TextAreaField
 from wtforms.validators import DataRequired, NumberRange
+from datetime import datetime
 
 # Create a Flask Instance
 app = Flask(__name__)
@@ -195,10 +196,16 @@ def newUser():
         form.password.data = ''
         form.age.data = ''
         form.school.data = ''
+       
         # Push to database
         args = (first_name, last_name, uni, password, age, school)
-        # g.conn.execute("INSERT INTO studentpatients VALUES (%s, %s, %s, %s, %d, %s)", args)
+        g.conn.execute("INSERT INTO studentpatients VALUES (%s, %s, %s, %s, %s, %s)", args)
         flash("Form Submitted Successfully")
+        global current_user
+        current_user = uni
+        g.user = current_user
+        return redirect("/users/" + current_user)
+
     return render_template("newUser.html", 
         first_name=first_name,
         last_name = last_name,
@@ -222,6 +229,11 @@ def review(review_id):
 
 @app.route('/newReview/<npi>', methods=['POST', 'GET'])
 def newReview(npi):
+
+    if not current_user:
+        flash("Please login to leave a review")
+        return redirect("/login")
+
     date_of_visit = None
     rating = None
     review_content = None
@@ -231,18 +243,33 @@ def newReview(npi):
         date_of_visit = form.date_of_visit.data
         rating = form.rating.data
         review_content = form.review_content.data
+
         form.date_of_visit.data = ''
         form.rating.data = ''
         form.review_content.data = ''
 
-        args = (date_of_visit, rating, review_content)
-        # g.conn.execute("INSERT INTO reviews VALUES (%s, %s, %s, %d, %s)", args)
+        review_id = str(add_to_review_count())
+
+        args_review = (review_id, date_of_visit, review_content, rating)
+        g.conn.execute("INSERT INTO reviews VALUES (%s, %s, %s, %s)", args_review)
+
+        date_written = datetime.now()
+        args_writes = (npi, current_user, review_id, date_written)
+        g.conn.execute("INSERT INTO writes VALUES (%s, %s, %s, %s)", args_writes)
+
         flash("Form Submitted Successfully")
+        return redirect("/reviews/" + review_id)
+
     return render_template("newReview.html",
         date_of_visit = date_of_visit,
         rating = rating,
         review_content = review_content,
         form=form)
+
+def add_to_review_count():
+    cursor = g.conn.execute("SELECT * FROM reviews")
+    count = cursor.rowcount + 1
+    return count
 
 @app.route('/login', methods=['GET','POST'])
 def login():

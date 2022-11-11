@@ -29,11 +29,9 @@
 
         <!-- May have many reviews. This iterates over each review. Original database has 1 review per doctor -->
         <div>
-            {% set count = 0 %}
             {% for rev in reviews %}
-                {% set count = count + 1 %}
                 <div>
-                    <div><a href="\reviews\{{rev['review_id']}}"><h5>Review {{count}}</h5></a></div>
+                    <div><a href="\reviews\{{rev['review_id']}}"><h5>Review {{loop.index}}</h5></a></div>
                     <div class="row">
                     <div class="col"><h6>Student UNI: </h6><p>{{rev['uni']}}</p></div>
                     <div class="col"><h6>Rating: </h6><p>{{rev['rating']}}</p></div>

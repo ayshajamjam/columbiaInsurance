@@ -37,6 +37,8 @@ app.config['SECRET_KEY'] = 'databases'
 DATABASEURI = "postgresql://aj2604:316@34.75.94.195/proj1part2"
 engine = create_engine(DATABASEURI)
 
+current_user = None
+
 # Create a Form Class
 class NewUserForm(FlaskForm):
     first_name = StringField("First Name", validators=[DataRequired()])
@@ -56,34 +58,12 @@ class NewReviewForm(FlaskForm):
     review_content = TextAreaField("Review Content", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
-all_users = []
-
-@app.before_first_request
-def before_first_request():
-    try:
-        g.conn = engine.connect()
-
-        # New add ons
-        cursor = g.conn.execute("SELECT * FROM studentPatients")
-        for result in cursor:
-            all_users.append(result)
-        cursor.close()
-        
-    except:
-        print("uh oh, problem connecting to database")
-        import traceback; traceback.print_exc()
-        g.conn = None
-
 # Runs at beginning of every web request; sets up db connection
 @app.before_request
 def before_request():
     try:
         g.conn = engine.connect()
-
-        g.user = None
-        if 'user_uni' in session:
-            user = [x for x in all_users if x.uni == session['user_uni']][0]
-            g.user = user
+        g.user = current_user
 
     except:
         print("uh oh, problem connecting to database")
@@ -95,6 +75,7 @@ def before_request():
 @app.teardown_request
 def teardown_request(exception):
   try:
+    g.user = current_user
     g.conn.close()
   except Exception as e:
     pass
@@ -151,8 +132,7 @@ def users():
 
 @app.route('/users/<uni>')
 def user(uni):
-
-    if not g.user or g.user.uni != uni:
+    if not current_user or g.user != uni:
         flash("You do not have access to other students' profiles")
         return redirect(url_for('users'))
 
@@ -201,18 +181,23 @@ def newUser():
     school = None
     form = NewUserForm()
     if form.validate_on_submit():
+        # Grab information
         first_name = form.first_name.data
         last_name = form.last_name.data
         uni = form.uni.data
         password = form.password.data
         age = form.age.data
         school = form.school.data
+        # Set fields empty again
         form.first_name.data = ''
         form.last_name.data = ''
         form.uni.data = ''
         form.password.data = ''
         form.age.data = ''
         form.school.data = ''
+        # Push to database
+        args = (first_name, last_name, uni, password, age, school)
+        # g.conn.execute("INSERT INTO studentpatients VALUES (%s, %s, %s, %s, %d, %s)", args)
         flash("Form Submitted Successfully")
     return render_template("newUser.html", 
         first_name=first_name,
@@ -249,6 +234,9 @@ def newReview(npi):
         form.date_of_visit.data = ''
         form.rating.data = ''
         form.review_content.data = ''
+
+        args = (date_of_visit, rating, review_content)
+        # g.conn.execute("INSERT INTO reviews VALUES (%s, %s, %s, %d, %s)", args)
         flash("Form Submitted Successfully")
     return render_template("newReview.html",
         date_of_visit = date_of_visit,
@@ -260,8 +248,6 @@ def newReview(npi):
 def login():
     form = LoginForm()
     if request.method == 'POST':
-        session.pop('user_uni', None)
-
         if form.validate_on_submit():
             # Find correct user
             cursor = g.conn.execute("SELECT * FROM studentpatients")
@@ -276,7 +262,8 @@ def login():
                 # Password verification
                 if(form.password.data == user['password']):
                     flash("Login successful")
-                    session['user_uni'] = user.uni
+                    global current_user 
+                    current_user = user.uni
                     url = 'users/' + str(user.uni)
                     return redirect(url)
                 else:
@@ -287,12 +274,12 @@ def login():
 
 @app.route("/logout")
 def logout():
-    if g.user == None:
+    global current_user
+    if current_user == None:
         flash("No one is signed in")
     else:
         flash("Logout Successful")
-        g.user = None
-    session['user_uni'] = None
+        current_user = None
     return redirect(url_for('index'))
 
 if __name__ == "__main__":

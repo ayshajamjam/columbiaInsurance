@@ -53,15 +53,20 @@ class NewUserForm(FlaskForm):
 class EditUserForm(FlaskForm):
     first_name = StringField("First Name", validators=[DataRequired()])
     last_name = StringField("Last Name", validators=[DataRequired()])
-    uni = StringField("UNI", validators=[DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired()])
+    # uni = StringField("UNI", validators=[DataRequired()])
+    # password = PasswordField("Password", validators=[DataRequired()])
     age = IntegerField("Age", validators=[DataRequired()])
     school = StringField("School", validators=[DataRequired()])
     submit = SubmitField("Submit")
 class NewReviewForm(FlaskForm):
     date_of_visit = DateField("Date of Visit", validators=[DataRequired()])
     rating = IntegerField("Rating", validators=[DataRequired(), NumberRange(min=1, max=5)])
-    review_content = TextAreaField("Review Content", validators=[DataRequired()])
+    content = TextAreaField("Review Content", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+class EditReviewForm(FlaskForm):
+    date_of_visit = DateField("Date of Visit", validators=[DataRequired()])
+    rating = IntegerField("Rating", validators=[DataRequired(), NumberRange(min=1, max=5)])
+    content = TextAreaField("Review Content", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
 # Runs at beginning of every web request; sets up db connection
@@ -290,21 +295,21 @@ def newReview(npi):
 
     date_of_visit = None
     rating = None
-    review_content = None
+    content = None
 
     form = NewReviewForm()
     if form.validate_on_submit():
         date_of_visit = form.date_of_visit.data
         rating = form.rating.data
-        review_content = form.review_content.data
+        content = form.content.data
 
         form.date_of_visit.data = ''
         form.rating.data = ''
-        form.review_content.data = ''
+        form.content.data = ''
 
         review_id = str(add_to_review_count())
 
-        args_review = (review_id, date_of_visit, review_content, rating)
+        args_review = (review_id, date_of_visit, content, rating)
         g.conn.execute("INSERT INTO reviews VALUES (%s, %s, %s, %s)", args_review)
 
         date_written = datetime.now()
@@ -317,13 +322,42 @@ def newReview(npi):
     return render_template("newReview.html",
         date_of_visit = date_of_visit,
         rating = rating,
-        review_content = review_content,
+        content = content,
         form=form)
 
 def add_to_review_count():
     cursor = g.conn.execute("SELECT * FROM reviews")
     count = cursor.rowcount + 1
     return count
+
+@app.route('/reviews/<review_id>/edit', methods=['POST', 'GET'])
+def editReview(review_id):
+
+    # Get this review's information
+    cursor = g.conn.execute("SELECT * FROM reviews WHERE review_id=%s", review_id)
+    review = cursor.fetchone()
+
+    # Populate form with current information
+    form = EditReviewForm(request.form, obj = review)
+
+    if form.validate_on_submit():
+        # Grab new information
+        date_of_visit = form.date_of_visit.data
+        rating = form.rating.data
+        content = form.content.data
+
+        # Set fields empty again
+        form.date_of_visit.data = ''
+        form.rating.data = ''
+        form.content.data = ''
+       
+        # Push edits to database
+        g.conn.execute("UPDATE reviews SET date_of_visit=%s, rating=%s, content=%s", date_of_visit, rating, content)
+
+        flash("Review Updated Successfully")
+        return redirect("/reviews/" + str(review['review_id']))
+
+    return render_template("editReview.html", form=form)
 
 @app.route('/login', methods=['GET','POST'])
 def login():

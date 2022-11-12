@@ -11,8 +11,18 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endif %}
-        
-        <h1>See Review</h1>
+
+        <div class = "row">
+            <div class = 'col-8'>
+                <h1>See Review</h1>
+            </div>
+            <div class = 'col'>
+              <br/>
+              <a href="/reviews/{{data['review_id']}}/edit"><button type="button" class="btn btn-outline-primary">Edit</button></a>
+              <a href="/reviews/{{data['review_id']}}/delete"><button type="button" class="btn btn-outline-primary">Delete</button></a>
+          </div>
+        </div>
+
         <br/><br/>
         <div>
             <div class="row">
@@ -22,7 +32,6 @@
                 <div class="col"><h6>Date Written: </h6><p>{{data['date_written']}}</p></div>
                 <div class="col"><h6>Date Visited: </h6><p>{{data['date_of_visit']}}</p></div>
             </div>
-
             <h6>Review: </h6><p>{{data['content']}}</p>
             <br/>
         </div>

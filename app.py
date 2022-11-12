@@ -266,7 +266,7 @@ def editUser(uni):
 
 @app.route('/users/<uni>/delete', methods=['GET','DELETE'])
 def deleteUser(uni):
-    # Push edits to database
+    # Push delete to database
     g.conn.execute("DELETE FROM studentpatients WHERE uni=%s", uni)
 
     flash("Profile Deleted")
@@ -358,6 +358,15 @@ def editReview(review_id):
         return redirect("/reviews/" + str(review['review_id']))
 
     return render_template("editReview.html", form=form)
+
+@app.route('/reviews/<review_id>/delete', methods=['GET','DELETE'])
+def deleteReview(review_id):
+    # Push delete to database
+    g.conn.execute("DELETE FROM writes WHERE review_id=%s", review_id)
+    g.conn.execute("DELETE FROM reviews WHERE review_id=%s", review_id)
+
+    flash("Review Deleted")
+    return redirect("/users/" + current_user)
 
 @app.route('/login', methods=['GET','POST'])
 def login():

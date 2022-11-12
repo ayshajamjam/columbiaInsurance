@@ -24,7 +24,7 @@ from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response, flash, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, IntegerField, DateField, TextAreaField
+from wtforms import StringField, SubmitField, PasswordField, IntegerField, DateField, TextAreaField, TimeField
 from wtforms.validators import DataRequired, NumberRange
 from datetime import datetime
 
@@ -67,6 +67,16 @@ class EditReviewForm(FlaskForm):
     date_of_visit = DateField("Date of Visit", validators=[DataRequired()])
     rating = IntegerField("Rating", validators=[DataRequired(), NumberRange(min=1, max=5)])
     content = TextAreaField("Review Content", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+class NewAptForm(FlaskForm):
+    apt_date = DateField("Date of Appointment", validators=[DataRequired()])
+    apt_time = TimeField("Time of Appointment", validators=[DataRequired()])
+    concern_description = TextAreaField("Concern Description", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+class EditAptForm(FlaskForm):
+    apt_date = DateField("Date of Appointment", validators=[DataRequired()])
+    apt_time = TimeField("Time of Appointment", validators=[DataRequired()])
+    concern_description = TextAreaField("Concern Description", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
 # Runs at beginning of every web request; sets up db connection
@@ -434,45 +444,54 @@ def apt(apt_id):
 
     return render_template("apt.html", **context)
 
-# @app.route('/newApt/<npi>', methods=['POST', 'GET'])
-# def newApt(npi):
+@app.route('/newApt/<npi>', methods=['POST', 'GET'])
+def newApt(npi):
 
-#     if not current_user:
-#         flash("Please login to book an appointment")
-#         return redirect("/login")
+    if not current_user:
+        flash("Please login to book an appointment")
+        return redirect("/login")
 
-#     apt_date = None
-#     apt_time = None
-#     concern_description = None
+    apt_date = None
+    apt_time = None
+    concern_description = None
 
-#     form = NewAptForm()
+    form = NewAptForm()
 
-#     if form.validate_on_submit():
-#         apt_date = form.apt_date.data
-#         apt_time = form.apt_time.data
-#         concern_description = form.concern_description.data
+    if form.validate_on_submit():
+        apt_date = form.apt_date.data
+        apt_time = form.apt_time.data
+        concern_description = form.concern_description.data
 
-#         form.apt_date.data = ''
-#         form.apt_time.data = ''
-#         form.concern_description.data = ''
+        form.apt_date.data = ''
+        form.apt_time.data = ''
+        form.concern_description.data = ''
 
-#         apt_id = str(add_to_apt_count())
+        apt_id = str(add_to_apt_count())
 
-#         args_review = (apt_id, apt_date, apt_time, concern_description)
-#         g.conn.execute("INSERT INTO apts VALUES (%s, %s, %s, %s)", args_review)
+        args_apt = (apt_id, apt_date, apt_time, concern_description)
+        g.conn.execute("INSERT INTO appointments VALUES (%s, %s, %s, %s)", args_apt)
 
-#         date_written = datetime.now()
-#         args_writes = (npi, current_user, apt_id, date_written)
-#         g.conn.execute("INSERT INTO schedules VALUES (%s, %s, %s, %s)", args_writes)
+        # Get Hospital information
+        cursor = g.conn.execute("SELECT * FROM hospitals AS H, schedules as S WHERE H.cms = S.cms AND S.npi = %s", npi)
+        hospital_info = cursor.fetchone()
+        cursor.close()
 
-#         flash("Form Submitted Successfully")
-#         return redirect("/apts/" + apt_id)
+        args_schedules = (npi, hospital_info['cms'], apt_id, current_user)
+        g.conn.execute("INSERT INTO schedules VALUES (%s, %s, %s, %s)", args_schedules)
 
-#     return render_template("newApt.html",
-#         apt_date = apt_date,
-#         apt_time = apt_time,
-#         content = concern_description,
-#         form=form)
+        flash("Appointment Scheduled")
+        return redirect("/apts/" + apt_id)
+
+    return render_template("newApt.html",
+        apt_date = apt_date,
+        apt_time = apt_time,
+        content = concern_description,
+        form=form)
+
+def add_to_apt_count():
+    cursor = g.conn.execute("SELECT * FROM appointments")
+    count = cursor.rowcount + 1
+    return count
 
 # @app.route('/apts/<apt_id>/edit', methods=['POST', 'GET'])
 # def editApt(apt_id):

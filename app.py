@@ -485,7 +485,7 @@ def newApt(npi):
     return render_template("newApt.html",
         apt_date = apt_date,
         apt_time = apt_time,
-        content = concern_description,
+        concern_description = concern_description,
         form=form)
 
 def add_to_apt_count():
@@ -493,8 +493,39 @@ def add_to_apt_count():
     count = cursor.rowcount + 1
     return count
 
-# @app.route('/apts/<apt_id>/edit', methods=['POST', 'GET'])
-# def editApt(apt_id):
+@app.route('/apts/<apt_id>/edit', methods=['POST', 'GET'])
+def editApt(apt_id):
+
+    if not current_user:
+        flash("Please login to book an appointment")
+        return redirect("/login")
+        
+    # Get this apts's information
+    cursor = g.conn.execute("SELECT * FROM appointments WHERE apt_id=%s", apt_id)
+    apt = cursor.fetchone()
+    cursor.close()
+
+    # Populate form with current information
+    form = EditAptForm(request.form, obj = apt)
+
+    if form.validate_on_submit():
+        # Grab new information
+        apt_date = form.apt_date.data
+        apt_time = form.apt_time.data
+        concern_description = form.concern_description.data
+
+        # Set fields empty again
+        form.apt_date.data = ''
+        form.apt_time.data = ''
+        form.concern_description.data = ''
+       
+        # Push edits to database
+        g.conn.execute("UPDATE appointments SET apt_date=%s, apt_time=%s, concern_description=%s", apt_date, apt_time, concern_description)
+
+        flash("Appointment Updated Successfully")
+        return redirect("/apts/" + str(apt['apt_id']))
+
+    return render_template("editApt.html", form=form)
 
 # @app.route('/apts/<apt_id>/delete', methods=['GET','DELETE'])
 # def deleteApt(apt_id):

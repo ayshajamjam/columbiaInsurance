@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Edit Apt{% endblock %}
+
+{% block content %}
+
+    <div class = "container">
+
+        {% if error_statement %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            {{ error_statement }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        <h1>Modify Your Appointment</h1>
+        <br/>
+
+        <form method = "POST">
+            {{ form.hidden_tag() }}
+
+            {{ form.apt_date.label(class="form-label") }}
+            {{ form.apt_date(class="form-control") }}
+            <br/>
+
+            {{ form.apt_time.label(class="form-label") }}
+            {{ form.apt_time(class="form-control") }}
+            <br/>
+
+            {{ form.concern_description.label(class="form-label") }}
+            {{ form.concern_description(class="form-control") }}
+            <br/>
+
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    </div>
+
+{% endblock %}

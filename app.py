@@ -153,9 +153,10 @@ def users():
 
 @app.route('/users/<uni>')
 def user(uni):
-    # if not current_user or g.user != uni:
-    #     flash("You do not have access to other students' profiles")
-    #     return redirect(url_for('users'))
+
+    if not current_user or g.user != uni:
+        flash("You do not have access to other students' profiles")
+        return redirect(url_for('users'))
 
     # Get only user information
     cursor = g.conn.execute("SELECT * FROM studentPatients")

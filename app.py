@@ -336,6 +336,7 @@ def editReview(review_id):
     # Get this review's information
     cursor = g.conn.execute("SELECT * FROM reviews WHERE review_id=%s", review_id)
     review = cursor.fetchone()
+    # cursor.close() <<<<<<<<<<<<<< Do I need this?
 
     # Populate form with current information
     form = EditReviewForm(request.form, obj = review)
@@ -417,6 +418,24 @@ def save(npi):
         g.conn.execute("INSERT INTO saves VALUES (%s, %s)", args)
         flash("Doctor Saved")
         return redirect('/users/' + current_user)
+
+@app.route('/apts/<apt_id>')
+def apt(apt_id):
+    cursor = g.conn.execute("SELECT * FROM doctors AS D, schedules AS S, appointments AS A WHERE D.npi = S.npi AND S.apt_id=A.apt_id")
+    apt_result = cursor.fetchone()
+    cursor.close()
+    context = dict(data = apt_result)
+
+    return render_template("apt.html", **context)
+
+# @app.route('/newApt/<npi>', methods=['POST', 'GET'])
+# def newApt(npi):
+
+# @app.route('/apts/<apt_id>/edit', methods=['POST', 'GET'])
+# def editApt(apt_id):
+
+# @app.route('/apts/<apt_id>/delete', methods=['GET','DELETE'])
+# def deleteApt(apt_id):
 
 if __name__ == "__main__":
   import click

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Appointment{% endblock %}
+
+{% block content %}
+
+    <div class = "container">
+
+        {% if error_statement %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            {{ error_statement }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        <div class = "row">
+            <div class = 'col-8'>
+                <h1>See Appointment</h1>
+            </div>
+            <div class = 'col'>
+              <br/>
+              <a href="/apts/{{data['apt_id']}}/edit"><button type="button" class="btn btn-outline-primary">Edit</button></a>
+              <a href="/apts/{{data['apt_id']}}/delete"><button type="button" class="btn btn-outline-primary">Delete</button></a>
+          </div>
+        </div>
+
+        <br/><br/>
+        <div>
+            <div class="row">
+                <div class="col"><h6>Doctor: </h6><a href="\doctors\{{data['npi']}}">{{ data['first_name'] }}  {{ data['last_name'] }}</a></div>
+                <div class="col"><h6>Date of Appointment: </h6><p>{{data['apt_date']}}</p></div>
+                <div class="col"><h6>Time of Appointment: </h6><p>{{data['apt_time']}}</p></div>
+            </div>
+            <h6>Concern Description: </h6><p>{{data['concern_description']}}</p>
+            <br/>
+        </div>
+    </div>
+
+{% endblock %}

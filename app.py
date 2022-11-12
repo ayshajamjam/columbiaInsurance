@@ -499,7 +499,7 @@ def editApt(apt_id):
     if not current_user:
         flash("Please login to book an appointment")
         return redirect("/login")
-        
+
     # Get this apts's information
     cursor = g.conn.execute("SELECT * FROM appointments WHERE apt_id=%s", apt_id)
     apt = cursor.fetchone()
@@ -527,8 +527,19 @@ def editApt(apt_id):
 
     return render_template("editApt.html", form=form)
 
-# @app.route('/apts/<apt_id>/delete', methods=['GET','DELETE'])
-# def deleteApt(apt_id):
+@app.route('/apts/<apt_id>/delete', methods=['GET','DELETE'])
+def deleteApt(apt_id):
+
+    if not current_user:
+        flash("Please login to book an appointment")
+        return redirect("/login")
+    
+    # Push delete to database
+    g.conn.execute("DELETE FROM schedules WHERE apt_id=%s", apt_id)
+    g.conn.execute("DELETE FROM appointments WHERE apt_id=%s", apt_id)
+
+    flash("Appointment Cancelled")
+    return redirect("/users/" + current_user)
 
 if __name__ == "__main__":
   import click

@@ -172,7 +172,7 @@ def user(uni):
     cursor.close()
     
     # Get specific user + appointments
-    cursor = g.conn.execute("SELECT * FROM studentPatients AS S, doctors AS D, appointments AS A, schedules AS H WHERE S.uni = H.uni AND D.npi = H.npi AND A.apt_id=H.apt_id")
+    cursor = g.conn.execute("SELECT * FROM hospitals AS Q, studentPatients AS S, doctors AS D, appointments AS A, schedules AS H WHERE Q.cms = H.cms AND S.uni = H.uni AND D.npi = H.npi AND A.apt_id=H.apt_id")
     user_apts = []
     for result in cursor:
         if result['uni'] == uni:
@@ -421,15 +421,58 @@ def save(npi):
 
 @app.route('/apts/<apt_id>')
 def apt(apt_id):
-    cursor = g.conn.execute("SELECT * FROM doctors AS D, schedules AS S, appointments AS A WHERE D.npi = S.npi AND S.apt_id=A.apt_id")
+    cursor = g.conn.execute("SELECT * FROM studentPatients AS P, doctors AS D, appointments AS A, schedules AS S, works_at AS W WHERE W.cms = S.cms AND P.uni = S.uni AND D.npi = S.npi AND W.npi = D.npi AND A.apt_id=S.apt_id AND A.apt_id=%s", apt_id)
+
     apt_result = cursor.fetchone()
     cursor.close()
-    context = dict(data = apt_result)
+
+    # Get Hospital information
+    cursor = g.conn.execute("SELECT * FROM hospitals AS H, schedules as S WHERE H.cms = S.cms AND S.npi = %s", apt_result['npi'])
+    hospital_info = cursor.fetchone()
+    cursor.close()
+    context = dict(data = apt_result, hospital = hospital_info)
 
     return render_template("apt.html", **context)
 
 # @app.route('/newApt/<npi>', methods=['POST', 'GET'])
 # def newApt(npi):
+
+#     if not current_user:
+#         flash("Please login to book an appointment")
+#         return redirect("/login")
+
+#     apt_date = None
+#     apt_time = None
+#     concern_description = None
+
+#     form = NewAptForm()
+
+#     if form.validate_on_submit():
+#         apt_date = form.apt_date.data
+#         apt_time = form.apt_time.data
+#         concern_description = form.concern_description.data
+
+#         form.apt_date.data = ''
+#         form.apt_time.data = ''
+#         form.concern_description.data = ''
+
+#         apt_id = str(add_to_apt_count())
+
+#         args_review = (apt_id, apt_date, apt_time, concern_description)
+#         g.conn.execute("INSERT INTO apts VALUES (%s, %s, %s, %s)", args_review)
+
+#         date_written = datetime.now()
+#         args_writes = (npi, current_user, apt_id, date_written)
+#         g.conn.execute("INSERT INTO schedules VALUES (%s, %s, %s, %s)", args_writes)
+
+#         flash("Form Submitted Successfully")
+#         return redirect("/apts/" + apt_id)
+
+#     return render_template("newApt.html",
+#         apt_date = apt_date,
+#         apt_time = apt_time,
+#         content = concern_description,
+#         form=form)
 
 # @app.route('/apts/<apt_id>/edit', methods=['POST', 'GET'])
 # def editApt(apt_id):

@@ -4,9 +4,6 @@ To run locally:
     python3 app.py --debug
 Go to http://localhost:8111 in your browser.
 
-References (code taken from online sites):
-Login/Authentication: https://github.com/PrettyPrinted/youtube_video_code/blob/master/2020/02/10/Creating%20a%20Login%20Page%20in%20Flask%20Using%20Sessions/flask_session_example/app.py
-
 After cloning, make virtual env
 source virtual/bin/activate
 export FLASK_ENV=development
@@ -41,6 +38,10 @@ engine = create_engine(DATABASEURI)
 current_user = None
 
 # Create a Form Class
+class LoginForm(FlaskForm):
+    uni = StringField("UNI", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    submit = SubmitField("Submit")
 class NewUserForm(FlaskForm):
     first_name = StringField("First Name", validators=[DataRequired()])
     last_name = StringField("Last Name", validators=[DataRequired()])
@@ -49,9 +50,13 @@ class NewUserForm(FlaskForm):
     age = IntegerField("Age", validators=[DataRequired()])
     school = StringField("School", validators=[DataRequired()])
     submit = SubmitField("Submit")
-class LoginForm(FlaskForm):
+class EditUserForm(FlaskForm):
+    first_name = StringField("First Name", validators=[DataRequired()])
+    last_name = StringField("Last Name", validators=[DataRequired()])
     uni = StringField("UNI", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
+    age = IntegerField("Age", validators=[DataRequired()])
+    school = StringField("School", validators=[DataRequired()])
     submit = SubmitField("Submit")
 class NewReviewForm(FlaskForm):
     date_of_visit = DateField("Date of Visit", validators=[DataRequired()])
@@ -133,9 +138,9 @@ def users():
 
 @app.route('/users/<uni>')
 def user(uni):
-    if not current_user or g.user != uni:
-        flash("You do not have access to other students' profiles")
-        return redirect(url_for('users'))
+    # if not current_user or g.user != uni:
+    #     flash("You do not have access to other students' profiles")
+    #     return redirect(url_for('users'))
 
     # Get only user information
     cursor = g.conn.execute("SELECT * FROM studentPatients")
@@ -214,6 +219,45 @@ def newUser():
         age = age,
         school = school,
         form=form)
+
+@app.route('/users/<uni>/edit', methods=['GET','POST'])
+def editUser(uni):
+
+    # Get this user's information
+    cursor = g.conn.execute("SELECT * FROM studentPatients")
+    user_info = []
+    for result in cursor:
+        if result['uni'] == uni:
+            user_info.append(result)
+    cursor.close()
+    user = user_info[0]
+
+    # Populate form with current information
+    form = EditUserForm(request.form, obj = user)
+
+    if form.validate_on_submit():
+        # Grab new information
+        first_name = form.first_name.data
+        last_name = form.last_name.data
+        age = form.age.data
+        school = form.school.data
+
+        # Set fields empty again
+        form.first_name.data = ''
+        form.last_name.data = ''
+        form.age.data = ''
+        form.school.data = ''
+       
+        # Push edits to database
+        g.conn.execute("UPDATE studentpatients SET first_name=%s, last_name=%s, age=%s, school=%s WHERE uni=%s", first_name, last_name, age, school, uni)
+
+        flash("Profile Information Updated Successfully")
+        global current_user
+        current_user = uni
+        g.user = current_user
+        return redirect("/users/" + current_user)
+
+    return render_template("editUser.html", form=form)
 
 @app.route('/reviews/<review_id>')
 def review(review_id):

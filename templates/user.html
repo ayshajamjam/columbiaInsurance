@@ -15,9 +15,14 @@
   <div class = "row">
       <div class = 'col-8'>
           <h1>{{info['first_name']}} {{info['last_name']}}, {{info['uni']}}</h1>
-          <h3>Age: {{info['age']}}</h3>
-          <h3>School: {{info['school']}}</h3>
+          <h4>Age: {{info['age']}}</h4>
+          <h4>School: {{info['school']}}</h4>
       </div>
+      <div class = 'col'>
+        <br/>
+        <a href="/users/{{info['uni']}}/edit"><button type="button" class="btn btn-outline-primary">Edit</button></a>
+        <button type="button" class="btn btn-outline-primary">Delete</button>
+    </div>
   </div>
   <br/><br/>
 
@@ -56,14 +61,11 @@
   <!-- May have many reviews. This iterates over each review. -->
   <h3>Reviews</h3>
   <br/>
-  
     <div>
       {% if reviews %}
-        {% set count = 0 %}
         {% for rev in reviews %}
-            {% set count = count + 1 %}
             <div>
-                <div><a href="\reviews\{{rev['review_id']}}"><h5>Review {{count}}</h5></a></div>
+                <div><a href="\reviews\{{rev['review_id']}}"><h5>Review {{loop.index}}</h5></a></div>
                 <br/>
                 <div class="row">
                 <div class="col"><h6>Student UNI: </h6><p>{{rev['uni']}}</p></div>

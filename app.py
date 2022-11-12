@@ -259,6 +259,16 @@ def editUser(uni):
 
     return render_template("editUser.html", form=form)
 
+@app.route('/users/<uni>/delete', methods=['GET','DELETE'])
+def deleteUser(uni):
+    # Push edits to database
+    g.conn.execute("DELETE FROM studentpatients WHERE uni=%s", uni)
+
+    flash("Profile Deleted")
+    global current_user
+    current_user = None
+    return redirect('/login')
+
 @app.route('/reviews/<review_id>')
 def review(review_id):
     cursor = g.conn.execute("SELECT * FROM doctors AS D, writes AS W, reviews AS R WHERE D.npi = W.npi AND W.review_id=R.review_id")

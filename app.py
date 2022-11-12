@@ -406,6 +406,18 @@ def logout():
         current_user = None
     return redirect(url_for('index'))
 
+@app.route("/doctors/<npi>/save")
+def save(npi):
+    if not current_user:
+        flash("Please login to save a doctor first")
+        return redirect(url_for('login'))
+    else:
+        # Push to database
+        args = (current_user, npi)
+        g.conn.execute("INSERT INTO saves VALUES (%s, %s)", args)
+        flash("Doctor Saved")
+        return redirect('/users/' + current_user)
+
 if __name__ == "__main__":
   import click
 

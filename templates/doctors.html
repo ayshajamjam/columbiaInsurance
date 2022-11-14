@@ -5,10 +5,16 @@
 
     <div class = "container">
         <h1>Doctors</h1>
-      
-        <div>
+        <div class = "card-deck row" style="width:1200px; display: flexwrap; flex-wrap:wrap">
           {% for doc in data %}
-          <li><a href="/doctors/{{doc['npi']}}">{{ doc['first_name'] }}  {{ doc['last_name'] }}</a>, {{ doc['job_title'] }}</li>
+            <div class="card" style="width: 350px; height: 490px; border:none; margin: 10px; padding: 0px;">
+              <img class="card-img-top" style="height:350px; object-fit: cover; object-position: 80% 0" src="{{doc['photo_link']}}" alt="Card image cap">
+              <div class="card-body">
+                <a href="/doctors/{{doc['npi']}}"><h4 class="card-title">{{ doc['first_name'] }}  {{ doc['last_name'] }}</h4></a>
+                <h5>{{ doc['job_title'] }}</h5>
+                <p class="card-text">Rating: {{ doc['avg_rating'] }}</p>
+              </div>
+          </div>
           {% endfor %}
         </div>
     </div>

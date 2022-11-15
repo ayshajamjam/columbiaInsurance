@@ -11,9 +11,13 @@
             </div>
             <div class = 'col'>
                 <br/>
-                <a href="/doctors/{{info['npi']}}/save"><button type="button" class="btn btn-outline-primary">Save</button></a>
-                <a href="/newApt/{{info['npi']}}"><button type="button" class="btn btn-outline-primary">Book Appointment</button></a>
-                <a href="/newReview/{{info['npi']}}"><button type="button" class="btn btn-outline-primary">Review</button></a>
+                {% if saved %}
+                    <a href="/doctors/{{info['npi']}}/save/delete"><button type="button" class="btn profile-button">Unsave</button></a>
+                {% else %}
+                    <a href="/doctors/{{info['npi']}}/save"><button type="button" class="btn profile-button">Save</button></a>
+                {% endif %}
+                <a href="/newApt/{{info['npi']}}"><button type="button" class="btn profile-button">Book Appointment</button></a>
+                <a href="/newReview/{{info['npi']}}"><button type="button" class="btn profile-button">Review</button></a>
             </div>
         </div>
         <br/>
@@ -28,23 +32,30 @@
         <br/><br/>
 
         <!-- May have many reviews. This iterates over each review. Original database has 1 review per doctor -->
-        <div>
-            {% for rev in reviews %}
-                <div>
+        <div class = "profile-deck">
+            {% if reviews %}
+              {% for rev in reviews %}
+                <div class="card">
+                  <div class="card-header">
                     <div><a href="\reviews\{{rev['review_id']}}"><h5>Review {{loop.index}}</h5></a></div>
+                  </div>
+                  <div class="card-body">
                     <div class="row">
-                    <div class="col"><h6>Student UNI: </h6><p>{{rev['uni']}}</p></div>
-                    <div class="col"><h6>Rating: </h6><p>{{rev['rating']}}</p></div>
-                    <div class="col"><h6>Date Written: </h6><p>{{rev['date_written']}}</p></div>
-                    <div class="col"><h6>Date Visited: </h6><p>{{rev['date_of_visit']}}</p></div>
+                      <div class="col"><h6>Student UNI: </h6><p>{{rev['uni']}}</p></div>
+                      <div class="col"><h6>Rating: </h6><p>{{rev['rating']}}</p></div>
+                      <div class="col"><h6>Date Written: </h6><p>{{rev['date_written']}}</p></div>
+                      <div class="col"><h6>Date Visited: </h6><p>{{rev['date_of_visit']}}</p></div>
                     </div>
-        
                     <h6>Review: </h6><p>{{rev['content']}}</p>
                     <br/>
+                  </div>
                 </div>
-                <br/><br/>
-            {% endfor %}
-        </div>
+              {% endfor %}
+            {% else %}
+              <h3>This doctor does not have any reviews</h3>
+            {% endif %}
+            <br/><br/>
+          </div>
     </div>
 
   </div>

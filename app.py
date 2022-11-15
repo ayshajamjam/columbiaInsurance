@@ -133,8 +133,13 @@ def doctor(npi):
         if result['npi'] == npi:
             doctor_reviews.append(result)
     cursor.close()
+
+    # Check if doctor is saved by current user
+    cursor = g.conn.execute("SELECT * FROM saves AS S WHERE S.npi=%s AND S.uni=%s", npi, current_user)
+    saved = cursor.fetchone()
+    cursor.close()
     
-    context = dict(info = doctor_info[0], reviews = doctor_reviews)
+    context = dict(info = doctor_info[0], reviews = doctor_reviews, saved=saved)
     return render_template("doctor.html", **context)
 
 @app.route('/users')
@@ -393,7 +398,6 @@ def login():
                 user = users[0]
                 # Password verification
                 if(form.password.data == user['password']):
-                    flash("Login successful")
                     global current_user 
                     current_user = user.uni
                     url = 'users/' + str(user.uni)
@@ -410,7 +414,6 @@ def logout():
     if current_user == None:
         flash("No one is signed in")
     else:
-        flash("Logout Successful")
         current_user = None
     return redirect(url_for('index'))
 
@@ -425,6 +428,19 @@ def save(npi):
         g.conn.execute("INSERT INTO saves VALUES (%s, %s)", args)
         flash("Doctor Saved")
         return redirect('/users/' + current_user)
+
+@app.route('/doctors/<npi>/save/delete', methods=['GET','DELETE'])
+def deleteSave(npi):
+
+    if not current_user:
+        flash("Please login to remove this doctor from your saved list")
+        return redirect("/login")
+    
+    # Push delete to database
+    g.conn.execute("DELETE FROM saves WHERE npi=%s AND uni=%s", npi, current_user)
+
+    flash("Removed doctor from saved list")
+    return redirect("/users/" + current_user)
 
 @app.route('/apts/<apt_id>')
 def apt(apt_id):

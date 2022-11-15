@@ -107,10 +107,6 @@ def teardown_request(exception):
 def index():
     return render_template("index.html")
 
-@app.route('/about')
-def about():
-    return render_template("about.html")
-
 @app.route('/doctors')
 def doctors():
     cursor = g.conn.execute("SELECT * FROM doctors")

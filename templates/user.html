@@ -2,9 +2,7 @@
 {% block title %}User{% endblock %}
 
 {% block content %}
-
 <div class = "container">
-
   {% for message in get_flashed_messages() %}
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
         {{ message }}
@@ -20,73 +18,83 @@
       </div>
       <div class = 'col'>
         <br/>
-        <a href="/users/{{info['uni']}}/edit"><button type="button" class="btn btn-outline-primary">Edit</button></a>
-        <a href="/users/{{info['uni']}}/delete"><button type="button" class="btn btn-outline-primary">Delete</button></a>
+        <a href="/users/{{info['uni']}}/edit"><button type="button" class="btn btn-outline-primary profile-button">Edit</button></a>
+        <a href="/users/{{info['uni']}}/delete"><button type="button" class="btn btn-outline-primary profile-button"">Delete</button></a>
     </div>
   </div>
   <br/><br/>
 
     <!-- May have many saved doctors. This iterates over each doctor. -->
     <h3>Saved Doctors</h3>
-    <br/>
     <div>
-      {% for rev in saved %}
-          <div>
-            <li><a href="\doctors\{{rev['npi']}}">{{ rev['first_name'] }}  {{ rev['last_name'] }}</a></li>
+      {% if saved %}
+        {% for rev in saved %}
+          <div class ="round-list col-lg-2">
+            <a href="\doctors\{{rev['npi']}}">{{ rev['first_name'] }}  {{ rev['last_name'] }}</a>
           </div>
-          <br/>
-      {% endfor %}
+        {% endfor %}
+      {% else %}
+        <p>You haven't saved any doctors yet</p>
+      {% endif %}
     </div>
-    <br/><br/>
+    <br/>
 
   <!-- May have many appointments. This iterates over each appointment. -->
   <h3>Appointments</h3>
   <br/>
-  <div>
-    {% for rev in appointments %}
-        <div>
-          <div><a href="\apts\{{rev['apt_id']}}"><h5>Appointment {{loop.index}}</h5></a></div>
-          <br/>
-          <div class="row">
-          <div class="col"><h6>Student UNI: </h6><p>{{rev['uni']}}</p></div>
-          <div class="col"><h6>Doctor: </h6><a href="\doctors\{{rev['npi']}}">{{ rev['first_name'] }}  {{ rev['last_name'] }}</a></div>
-          <div class="col"><h6>Hospital: </h6><p>{{rev['name']}}</p></div>
-          <div class="col"><h6>Date Scheduled: </h6><p>{{rev['apt_date']}}</p></div>
-          <div class="col"><h6>Time Scheduled: </h6><p>{{rev['apt_time']}}</p></div>
+  <div class = "profile-deck">
+    {% if appointments %}
+      {% for rev in appointments %}
+        <div class="card">
+          <div class="card-header">
+            <div><a href="\apts\{{rev['apt_id']}}"><h5>Appointment {{loop.index}}</h5></a></div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col"><h6>Student UNI: </h6><p>{{rev['uni']}}</p></div>
+              <div class="col"><h6>Doctor: </h6><a href="\doctors\{{rev['npi']}}">{{ rev['first_name'] }}  {{ rev['last_name'] }}</a></div>
+              <div class="col"><h6>Hospital: </h6><p>{{rev['name']}}</p></div>
+              <div class="col"><h6>Date Scheduled: </h6><p>{{rev['apt_date']}}</p></div>
+              <div class="col"><h6>Time Scheduled: </h6><p>{{rev['apt_time']}}</p></div>
+            </div>
+            <h6>Concern Description: </h6><p>{{rev['concern_description']}}</p>
+          </div>
         </div>
-
-        <h6>Concern Description: </h6><p>{{rev['concern_description']}}</p>
         <br/>
-    {% endfor %}
+      {% endfor %}
+    {% else %}
+      <p>You haven't booked any appointments yet</p>
+    {% endif %}
   </div>
-  <br/><br/>
+  <br/>
 
   <!-- May have many reviews. This iterates over each review. -->
   <h3>Reviews</h3>
   <br/>
-    <div>
-      {% if reviews %}
-        {% for rev in reviews %}
-            <div>
-                <div><a href="\reviews\{{rev['review_id']}}"><h5>Review {{loop.index}}</h5></a></div>
-                <br/>
-                <div class="row">
-                <div class="col"><h6>Student UNI: </h6><p>{{rev['uni']}}</p></div>
-                <div class="col"><h6>Rating: </h6><p>{{rev['rating']}}</p></div>
-                <div class="col"><h6>Date Written: </h6><p>{{rev['date_written']}}</p></div>
-                <div class="col"><h6>Date Visited: </h6><p>{{rev['date_of_visit']}}</p></div>
-                </div>
-
-                <h6>Review: </h6><p>{{rev['content']}}</p>
-                <br/>
+  <div class = "profile-deck">
+    {% if reviews %}
+      {% for rev in reviews %}
+        <div class="card">
+          <div class="card-header">
+            <div><a href="\reviews\{{rev['review_id']}}"><h5>Review {{loop.index}}</h5></a></div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col"><h6>Student UNI: </h6><p>{{rev['uni']}}</p></div>
+              <div class="col"><h6>Rating: </h6><p>{{rev['rating']}}</p></div>
+              <div class="col"><h6>Date Written: </h6><p>{{rev['date_written']}}</p></div>
+              <div class="col"><h6>Date Visited: </h6><p>{{rev['date_of_visit']}}</p></div>
             </div>
-            <br/><br/>
-        {% endfor %}
-      {% else %}
-          <p>Remember to leave a review for a doctor if you've seen one!</p>
-      {% endif %}
-    </div>
-
+            <h6>Review: </h6><p>{{rev['content']}}</p>
+            <br/>
+          </div>
+        </div>
+        <br/><br/>
+      {% endfor %}
+    {% else %}
+      <p>You haven't reviewed any doctors yet</p>
+    {% endif %}
+  </div>
   <br/><br/>
 </div>
 

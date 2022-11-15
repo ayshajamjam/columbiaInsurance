@@ -1,9 +1,8 @@
-
 .hero {
     background: #f8cc7c;
     min-height: 100vh;
     width: 100%;
-    color: #1d2026;
+    color: #2d3036;
     position: relative;
 }
 
@@ -43,6 +42,7 @@ nav ul li a {
 }
 
 .text_container {
+    color: #2d3036;
     max-width: 600px;
     margin-top: 5%;
     margin-left: 50%;
@@ -55,11 +55,82 @@ nav ul li a {
 
 .text_container a {
     text-decoration: none;
-    background: #1d2026;
+    background: #2d3036;
     color: #fff;
     padding: 14px 40px;
     display: inline-block;
     font-size: 18px;
     margin-top: 20px;
     border-radius: 30px;
+    margin-right: 10px;
+}
+
+.container .doctors-deck {
+    width: 100%;
+    justify-content: center;
+}
+
+.doctors-deck .card-deck {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.doctors-deck .card {
+    width: 350px;
+    height: 490px;
+    border-style: solid;
+    border-width: 3px;
+    border-color: #967944;
+    margin: 10px;
+    padding: 0px;
+}
+
+.doctors-deck .card .card-img-top {
+    height: 350px;
+    object-fit: cover; 
+    object-position: 80% 0;
+}
+
+.doctors-deck .card .card-body {
+    background-color: #f1e2c5;
+    color: #2d3036;
+}
+
+.doctors-deck .card .card-body a .card-title {
+    color: #2d3036;
+}
+
+.round-list {
+    margin: 20px;
+    padding: 20px;
+    background-color: #f2f3f4;
+    border-radius: 25px;
+    font-size: 18px;
+  }
+
+.round-list a {
+    color: #2d3036;
+}
+
+.profile-deck .card .card-header {
+    background-color: #ece0c7;
+}
+
+.profile-deck .card .card-header a{
+    color: #2d3036;
+}
+
+.profile-deck .card .card-body {
+    background-color: #f2f3f4;
+}
+
+.profile-button{
+    border-color: #2d3036;
+    color: #0a2758
+}
+
+.profile-button:hover{
+    border-color: #2d3036;
+    background-color:#2d3036;
 }

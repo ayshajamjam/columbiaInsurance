@@ -17,8 +17,10 @@
             <p>Welcome students! This site allows you to search for doctors under Columbia's 
             Aetna Student Health Insurance plan, leave reviews, and book appointments.</p>
 
-            <a href="{{url_for('login')}}">login</a>
-            <a href="{{url_for('newUser')}}">sign up</a>
+            {% if g.user == None %}
+                <a href="{{url_for('login')}}">login</a>
+                <a href="{{url_for('newUser')}}">sign up</a>
+            {% endif %}
         </div>
     </div>
 

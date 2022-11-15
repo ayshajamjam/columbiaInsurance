@@ -426,8 +426,7 @@ def save(npi):
         # Push to database
         args = (current_user, npi)
         g.conn.execute("INSERT INTO saves VALUES (%s, %s)", args)
-        flash("Doctor Saved")
-        return redirect('/users/' + current_user)
+        return redirect("/doctors/" + npi)
 
 @app.route('/doctors/<npi>/save/delete', methods=['GET','DELETE'])
 def deleteSave(npi):
@@ -438,9 +437,7 @@ def deleteSave(npi):
     
     # Push delete to database
     g.conn.execute("DELETE FROM saves WHERE npi=%s AND uni=%s", npi, current_user)
-
-    flash("Removed doctor from saved list")
-    return redirect("/users/" + current_user)
+    return redirect("/doctors/" + npi)
 
 @app.route('/apts/<apt_id>')
 def apt(apt_id):

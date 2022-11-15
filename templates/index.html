@@ -11,7 +11,15 @@
             </div>
         {% endfor %}
 
-        <h1>Columbia Insurance</h1>
+        <img src="/static/images/health-insurance.png" class = "home_img">
+        <div class = "text_container">
+            <h1>Columbia Insurance</h1>
+            <p>Welcome students! This site allows you to search for doctors under Columbia's 
+            Aetna Student Health Insurance plan, leave reviews, and book appointments.</p>
+
+            <a href="{{url_for('login')}}">login</a>
+            <a href="{{url_for('newUser')}}">sign up</a>
+        </div>
     </div>
 
 {% endblock %}

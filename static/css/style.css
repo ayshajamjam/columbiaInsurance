@@ -134,3 +134,19 @@ nav ul li a {
     border-color: #2d3036;
     background-color:#2d3036;
 }
+
+.form-button  {
+    text-decoration: none;
+    background: #2d3036;
+    color: #fff;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.form-button:hover {
+    text-decoration: none;
+    background: #55585e;
+    color: #fff;
+    display: inline-block;
+    margin-right: 10px;
+}

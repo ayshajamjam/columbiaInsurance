@@ -1,8 +1,11 @@
 # columbiaInsurance
 
 To run locally:
+
     source virtual/bin/activate
+    
     python3 app.py --debug
+    
 Go to http://localhost:8111 in your browser.
 
 References (code taken from online sites):

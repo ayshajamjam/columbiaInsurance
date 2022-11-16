@@ -23,10 +23,11 @@ from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response, flash, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField, IntegerField, DateField, TextAreaField, TimeField
 from wtforms.validators import DataRequired, NumberRange
-from datetime import datetime
+from wtforms.widgets import TextArea
 
 # Create a Flask Instance
 app = Flask(__name__)
@@ -38,6 +39,7 @@ engine = create_engine(DATABASEURI)
 current_user = None
 
 # Create a Form Class
+
 class LoginForm(FlaskForm):
     uni = StringField("UNI", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
@@ -77,6 +79,9 @@ class EditAptForm(FlaskForm):
     apt_date = DateField("Date of Appointment", validators=[DataRequired()])
     apt_time = TimeField("Time of Appointment", validators=[DataRequired()])
     concern_description = TextAreaField("Concern Description", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+class SearchForm(FlaskForm):
+    searched = StringField("Searched", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
 # Runs at beginning of every web request; sets up db connection
@@ -442,7 +447,6 @@ def deleteSave(npi):
 @app.route('/apts/<apt_id>')
 def apt(apt_id):
     cursor = g.conn.execute("SELECT * FROM studentPatients AS P, doctors AS D, appointments AS A, schedules AS S, works_at AS W WHERE W.cms = S.cms AND P.uni = S.uni AND D.npi = S.npi AND W.npi = D.npi AND A.apt_id=S.apt_id AND A.apt_id=%s", apt_id)
-
     apt_result = cursor.fetchone()
     cursor.close()
 
@@ -550,6 +554,52 @@ def deleteApt(apt_id):
 
     flash("Appointment Cancelled")
     return redirect("/users/" + current_user)
+
+# Pass stuff to base.html; will pass thing
+@app.context_processor
+def base():
+    form = SearchForm()
+    return dict(form=form)
+
+@app.route('/search', methods=['POST'])
+def search():
+    form = SearchForm()
+    
+    docs = []
+
+    # Get data from search box
+    query = form.searched.data
+    query = query.strip()
+
+    if(len(query) == 0):
+        return redirect('/doctors')
+
+    if form.validate_on_submit():
+
+        # Query by doc first name or last name of doctor
+        cursor = g.conn.execute("SELECT * FROM doctors WHERE first_name ILIKE %s OR last_name ILIKE %s", query, query)
+        for result in cursor:
+            docs.append(result)
+        cursor.close()
+
+        # Query by specialty
+        cursor = g.conn.execute("SELECT * FROM doctors AS D, specializes_in AS S WHERE D.npi=S.npi AND S.speciality ILIKE %s", query)
+        for result in cursor:
+            docs.append(result)
+        cursor.close()
+
+        query_arr = query.split()
+        if len(query_arr) == 2:
+            # Query by doc first name and last name
+            cursor = g.conn.execute("SELECT * FROM doctors WHERE first_name ILIKE %s AND last_name ILIKE %s", query_arr[0], query_arr[1])
+            for result in cursor:
+                docs.append(result)
+            cursor.close()
+
+    context = dict(data = docs)
+
+    return render_template("search_doc.html", **context, form=form, searched=query)
+
 
 if __name__ == "__main__":
   import click

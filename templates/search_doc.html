@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Search{% endblock %}
+
+{% block content %}
+
+    <div class = "container">
+        <br/>
+        <h2>You searched for: "{{searched}}"</h2>
+            <br/>
+            {% if data %}
+                <div class = "doctors-deck container">
+                    <div class = "card-deck row">
+                        {% for doc in data %}
+                            <div class="card">
+                            <img class="card-img-top" src="{{doc['photo_link']}}" alt="Card image cap">
+                            <div class="card-body">
+                                <a href="/doctors/{{doc['npi']}}"><h4 class="card-title">{{ doc['first_name'] }}  {{ doc['last_name'] }}</h4></a>
+                                <h5>{{ doc['job_title'] }}</h5>
+                                <p class="card-text">Rating: {{ doc['avg_rating'] }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <h3>No results found</h3>
+            {% endif %}
+        <br/><br/>
+    </div>
+
+{% endblock %}

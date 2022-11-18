@@ -37,6 +37,23 @@ DATABASEURI = "postgresql://aj2604:316@34.75.94.195/proj1part2"
 engine = create_engine(DATABASEURI)
 
 current_user = None
+# review_id = 0
+# apt_id = 0
+
+# def counts():
+#     # Assign reviews count
+#     cursor = g.conn.execute("SELECT * FROM reviews")
+#     count = cursor.rowcount
+#     cursor.close()
+#     global review_id
+#     review_id = count
+
+#     # Assign appointment count
+#     cursor = g.conn.execute("SELECT * FROM appointments")
+#     count = cursor.rowcount
+#     cursor.close()
+#     global apt_id
+#     apt_id = count
 
 # Create a Form Class
 
@@ -227,7 +244,6 @@ def newUser():
         # Push to database
         args = (first_name, last_name, uni, password, age, school)
         g.conn.execute("INSERT INTO studentpatients VALUES (%s, %s, %s, %s, %s, %s)", args)
-        flash("Form Submitted Successfully")
         global current_user
         current_user = uni
         g.user = current_user
@@ -333,7 +349,6 @@ def newReview(npi):
         args_writes = (npi, current_user, review_id, date_written)
         g.conn.execute("INSERT INTO writes VALUES (%s, %s, %s, %s)", args_writes)
 
-        flash("Form Submitted Successfully")
         return redirect("/reviews/" + review_id)
 
     return render_template("newReview.html",
@@ -345,6 +360,7 @@ def newReview(npi):
 def add_to_review_count():
     cursor = g.conn.execute("SELECT * FROM reviews")
     count = cursor.rowcount + 1
+    cursor.close()
     return count
 
 @app.route('/reviews/<review_id>/edit', methods=['POST', 'GET'])
@@ -372,7 +388,6 @@ def editReview(review_id):
         # Push edits to database
         g.conn.execute("UPDATE reviews SET date_of_visit=%s, rating=%s, content=%s", date_of_visit, rating, content)
 
-        flash("Review Updated Successfully")
         return redirect("/reviews/" + str(review['review_id']))
 
     return render_template("editReview.html", form=form)
@@ -493,7 +508,6 @@ def newApt(npi):
         args_schedules = (npi, hospital_info['cms'], apt_id, current_user)
         g.conn.execute("INSERT INTO schedules VALUES (%s, %s, %s, %s)", args_schedules)
 
-        flash("Appointment Scheduled")
         return redirect("/apts/" + apt_id)
 
     return render_template("newApt.html",
@@ -505,6 +519,7 @@ def newApt(npi):
 def add_to_apt_count():
     cursor = g.conn.execute("SELECT * FROM appointments")
     count = cursor.rowcount + 1
+    cursor.close()
     return count
 
 @app.route('/apts/<apt_id>/edit', methods=['POST', 'GET'])
@@ -576,27 +591,16 @@ def search():
 
     if form.validate_on_submit():
 
-        # Query by doc first name or last name of doctor
-        cursor = g.conn.execute("SELECT * FROM doctors WHERE first_name ILIKE %s OR last_name ILIKE %s", query, query)
+        # Query by specialty or description
+        q = f'%{query}%'
+        cursor = g.conn.execute("SELECT * FROM doctors WHERE first_name ILIKE %s OR last_name ILIKE %s OR job_title ILIKE %s OR about ILIKE %s", q, q, q, q)
         for result in cursor:
-            docs.append(result)
-        cursor.close()
-
-        # Query by specialty
-        cursor = g.conn.execute("SELECT * FROM doctors AS D, specializes_in AS S WHERE D.npi=S.npi AND S.speciality ILIKE %s", query)
-        for result in cursor:
-            docs.append(result)
-        cursor.close()
-
-        query_arr = query.split()
-        if len(query_arr) == 2:
-            # Query by doc first name and last name
-            cursor = g.conn.execute("SELECT * FROM doctors WHERE first_name ILIKE %s AND last_name ILIKE %s", query_arr[0], query_arr[1])
-            for result in cursor:
+            if (result not in docs):
                 docs.append(result)
-            cursor.close()
+        cursor.close()
 
-    context = dict(data = docs)
+    docs_set = list(set(docs))
+    context = dict(data = docs_set)
 
     return render_template("search_doc.html", **context, form=form, searched=query)
 

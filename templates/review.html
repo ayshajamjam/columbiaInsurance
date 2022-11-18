@@ -17,10 +17,12 @@
                 <h1>See Review</h1>
             </div>
             <div class = 'col'>
-              <br/>
-              <a href="/reviews/{{data['review_id']}}/edit"><button type="button" class="btn profile-button">Edit</button></a>
-              <a href="/reviews/{{data['review_id']}}/delete"><button type="button" class="btn profile-button">Delete</button></a>
-          </div>
+                <br/>
+                {% if writer == g.user %}
+                    <a href="/reviews/{{data['review_id']}}/edit"><button type="button" class="btn profile-button">Edit</button></a>
+                    <a href="/reviews/{{data['review_id']}}/delete"><button type="button" class="btn profile-button">Delete</button></a>
+                {% endif %}
+            </div>
         </div>
 
         <br/><br/>

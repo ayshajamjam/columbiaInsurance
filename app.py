@@ -37,23 +37,6 @@ DATABASEURI = "postgresql://aj2604:316@34.75.94.195/proj1part2"
 engine = create_engine(DATABASEURI)
 
 current_user = None
-# review_id = 0
-# apt_id = 0
-
-# def counts():
-#     # Assign reviews count
-#     cursor = g.conn.execute("SELECT * FROM reviews")
-#     count = cursor.rowcount
-#     cursor.close()
-#     global review_id
-#     review_id = count
-
-#     # Assign appointment count
-#     cursor = g.conn.execute("SELECT * FROM appointments")
-#     count = cursor.rowcount
-#     cursor.close()
-#     global apt_id
-#     apt_id = count
 
 # Create a Form Class
 
@@ -309,13 +292,20 @@ def deleteUser(uni):
 
 @app.route('/reviews/<review_id>')
 def review(review_id):
+
+    # Find the student who wrote the review
+    cursor = g.conn.execute("SELECT uni FROM writes WHERE review_id=%s", review_id)
+    writer = cursor.fetchone()
+    cursor.close()
+
+    # Get review information
     cursor = g.conn.execute("SELECT * FROM doctors AS D, writes AS W, reviews AS R WHERE D.npi = W.npi AND W.review_id=R.review_id")
     review_result = []
     for result in cursor:
         if result['review_id'] == int(review_id):
             review_result.append(result)
     cursor.close()
-    context = dict(data = review_result[0])
+    context = dict(data = review_result[0], writer = writer[0])
 
     return render_template("review.html", **context)
 
@@ -366,6 +356,18 @@ def add_to_review_count():
 @app.route('/reviews/<review_id>/edit', methods=['POST', 'GET'])
 def editReview(review_id):
 
+    if not current_user:
+        flash("Please login to edit your review")
+        return redirect("/login")
+
+    cursor = g.conn.execute("SELECT * FROM writes WHERE review_id=%s AND uni=%s", review_id, current_user)
+    student = cursor.fetchone()
+    cursor.close()
+
+    if not student:
+        flash("You do not have access to edit other students' reviews")
+        return redirect("/users/" + current_user)
+
     # Get this review's information
     cursor = g.conn.execute("SELECT * FROM reviews WHERE review_id=%s", review_id)
     review = cursor.fetchone()
@@ -386,7 +388,7 @@ def editReview(review_id):
         form.content.data = ''
        
         # Push edits to database
-        g.conn.execute("UPDATE reviews SET date_of_visit=%s, rating=%s, content=%s", date_of_visit, rating, content)
+        g.conn.execute("UPDATE reviews SET date_of_visit=%s, rating=%s, content=%s WHERE review_id=%s", date_of_visit, rating, content, review_id)
 
         return redirect("/reviews/" + str(review['review_id']))
 
@@ -394,6 +396,20 @@ def editReview(review_id):
 
 @app.route('/reviews/<review_id>/delete', methods=['GET','DELETE'])
 def deleteReview(review_id):
+
+    if not current_user:
+        flash("Please login to delete your review")
+        return redirect("/login")
+
+    cursor = g.conn.execute("SELECT * FROM writes WHERE review_id=%s AND uni=%s", review_id, current_user)
+    student = cursor.fetchone()
+    cursor.close()
+
+    if not student:
+        flash("You do not have access to delete other students' reviews")
+        return redirect("/users/" + current_user)
+
+
     # Push delete to database
     g.conn.execute("DELETE FROM writes WHERE review_id=%s", review_id)
     g.conn.execute("DELETE FROM reviews WHERE review_id=%s", review_id)
@@ -461,6 +477,15 @@ def deleteSave(npi):
 
 @app.route('/apts/<apt_id>')
 def apt(apt_id):
+
+    cursor = g.conn.execute("SELECT * FROM schedules WHERE apt_id=%s AND uni=%s", apt_id, current_user)
+    student = cursor.fetchone()
+    cursor.close()
+
+    if not current_user or not student:
+        flash("You do not have access to other students' appointment information")
+        return redirect(url_for('users'))
+
     cursor = g.conn.execute("SELECT * FROM studentPatients AS P, doctors AS D, appointments AS A, schedules AS S, works_at AS W WHERE W.cms = S.cms AND P.uni = S.uni AND D.npi = S.npi AND W.npi = D.npi AND A.apt_id=S.apt_id AND A.apt_id=%s", apt_id)
     apt_result = cursor.fetchone()
     cursor.close()
@@ -526,8 +551,16 @@ def add_to_apt_count():
 def editApt(apt_id):
 
     if not current_user:
-        flash("Please login to book an appointment")
+        flash("Please login to edit an appointment")
         return redirect("/login")
+
+    cursor = g.conn.execute("SELECT * FROM schedules WHERE apt_id=%s AND uni=%s", apt_id, current_user)
+    student = cursor.fetchone()
+    cursor.close()
+
+    if not student:
+        flash("You do not have access to edit other students' appointments")
+        return redirect("/users/" + current_user)
 
     # Get this apts's information
     cursor = g.conn.execute("SELECT * FROM appointments WHERE apt_id=%s", apt_id)
@@ -547,9 +580,9 @@ def editApt(apt_id):
         form.apt_date.data = ''
         form.apt_time.data = ''
         form.concern_description.data = ''
-       
+
         # Push edits to database
-        g.conn.execute("UPDATE appointments SET apt_date=%s, apt_time=%s, concern_description=%s", apt_date, apt_time, concern_description)
+        g.conn.execute("UPDATE appointments SET apt_date=%s, apt_time=%s, concern_description=%s WHERE apt_id=%s", apt_date, apt_time, concern_description, apt_id)
 
         flash("Appointment Updated Successfully")
         return redirect("/apts/" + str(apt['apt_id']))
@@ -560,8 +593,16 @@ def editApt(apt_id):
 def deleteApt(apt_id):
 
     if not current_user:
-        flash("Please login to book an appointment")
+        flash("Please login to delete an appointment")
         return redirect("/login")
+
+    cursor = g.conn.execute("SELECT * FROM schedules WHERE apt_id=%s AND uni=%s", apt_id, current_user)
+    student = cursor.fetchone()
+    cursor.close()
+
+    if not student:
+        flash("You do not have access to delete other students' appointments")
+        return redirect("/users/" + current_user)
     
     # Push delete to database
     g.conn.execute("DELETE FROM schedules WHERE apt_id=%s", apt_id)

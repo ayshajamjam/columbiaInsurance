@@ -330,6 +330,7 @@ def newReview(npi):
         form.rating.data = ''
         form.content.data = ''
 
+        # Get new review id
         review_id = str(add_to_review_count())
 
         args_review = (review_id, date_of_visit, content, rating)
@@ -348,8 +349,8 @@ def newReview(npi):
         form=form)
 
 def add_to_review_count():
-    cursor = g.conn.execute("SELECT * FROM reviews")
-    count = cursor.rowcount + 1
+    cursor = g.conn.execute("SELECT max(review_id) FROM reviews")
+    count = cursor.fetchone()[0] + 1
     cursor.close()
     return count
 
@@ -520,6 +521,7 @@ def newApt(npi):
         form.apt_time.data = ''
         form.concern_description.data = ''
 
+        # Get new appointment id
         apt_id = str(add_to_apt_count())
 
         args_apt = (apt_id, apt_date, apt_time, concern_description)
@@ -542,8 +544,8 @@ def newApt(npi):
         form=form)
 
 def add_to_apt_count():
-    cursor = g.conn.execute("SELECT * FROM appointments")
-    count = cursor.rowcount + 1
+    cursor = g.conn.execute("SELECT max(apt_id) FROM appointments")
+    count = cursor.fetchone()[0] + 1
     cursor.close()
     return count
 

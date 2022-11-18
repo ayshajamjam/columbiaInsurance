@@ -588,6 +588,14 @@ def search():
             docs.append(result)
         cursor.close()
 
+        # Query by doctor's about description
+        q = f'%{query}%'
+        cursor = g.conn.execute("SELECT * FROM doctors WHERE about ILIKE %s", q)
+        # cursor = g.conn.execute("SELECT * FROM doctors WHERE about ILIKE %(query)s", {'query': '% {}%'.format(query)})
+        for result in cursor:
+            docs.append(result)
+        cursor.close()
+
         query_arr = query.split()
         if len(query_arr) == 2:
             # Query by doc first name and last name

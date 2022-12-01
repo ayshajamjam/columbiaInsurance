@@ -1,5 +1,7 @@
 # columbiaInsurance
 
+[![Watch the video]](https://youtu.be/acKJ0WZz2Go)
+
 To run locally:
 
     source virtual/bin/activate

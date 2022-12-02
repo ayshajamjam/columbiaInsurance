@@ -3,7 +3,7 @@ CREATE TABLE Doctors (
     last_name VARCHAR(20) NOT NULL,
 	job_title VARCHAR(50) NOT NULL,
 	degree VARCHAR(3) NOT NULL,
-	about VARCHAR(2000),
+	about TEXT,
 	npi CHAR(10),
 	photo_link VARCHAR(300),
 	avg_rating REAL CHECK (avg_rating >= 0 AND avg_rating <= 5),
@@ -98,3 +98,15 @@ CREATE TABLE Writes (
     FOREIGN KEY (npi) REFERENCES Doctors,
     FOREIGN KEY (uni) REFERENCES StudentPatients
     	ON DELETE CASCADE);
+
+CREATE TRIGGER CheckApptDatet 
+BEFORE INSERT ON Appointments 
+FOR EACH ROW
+	DECLARE invalid_date EXCEPTION;
+	IF :NEW.apt_date > SYSDATE THEN 
+	RAISE invalid_date;
+	END IF;
+	EXCEPTION
+	WHEN invalid_date THEN 
+	RAISE_APPLICATION_ERROR(-20001, ‘The date of the appointment must be before the current date.’)
+	END;

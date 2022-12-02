@@ -104,7 +104,7 @@ BEFORE INSERT ON Appointments
 FOR EACH ROW
 	DECLARE invalid_date EXCEPTION;
 	BEGIN
-	IF :NEW.apt_date > SYSDATE THEN 
+	IF :NEW.apt_date < SYSDATE THEN 
 	RAISE invalid_date;
 	END IF;
 	EXCEPTION

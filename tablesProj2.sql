@@ -99,14 +99,15 @@ CREATE TABLE Writes (
     FOREIGN KEY (uni) REFERENCES StudentPatients
     	ON DELETE CASCADE);
 
-CREATE TRIGGER CheckApptDatet 
+CREATE TRIGGER CheckApptDate
 BEFORE INSERT ON Appointments 
 FOR EACH ROW
 	DECLARE invalid_date EXCEPTION;
+	BEGIN
 	IF :NEW.apt_date > SYSDATE THEN 
 	RAISE invalid_date;
 	END IF;
 	EXCEPTION
 	WHEN invalid_date THEN 
-	RAISE_APPLICATION_ERROR(-20001, ‘The date of the appointment must be before the current date.’)
+	RAISE_APPLICATION_ERROR(-20001, 'The date of the appointment must be before the current date.')
 	END;

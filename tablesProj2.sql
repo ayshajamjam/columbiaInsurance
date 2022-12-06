@@ -99,7 +99,6 @@ CREATE TABLE Writes (
     FOREIGN KEY (uni) REFERENCES StudentPatients
     	ON DELETE CASCADE);
 
-
 CREATE FUNCTION current_date_check ()
 RETURNS TRIGGER
 AS 

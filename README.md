@@ -1,6 +1,27 @@
 # Columbia Insurance
 
+## Demo
+
+<a href="https://www.youtube.com/watch?v=acKJ0WZz2Go&ab_channel=AyshaJamal" target="_blank"><img src="./Homepage.jpg" 
+alt="demo video" border="10" /></a>
+
 [Demo Video](https://youtu.be/acKJ0WZz2Go)
+
+## Description
+
+Our database only includes doctors that take Aetna insurance that many students at Columbia have (the open choice PPO) taken from the Aetna website.<br>
+
+**Search:** Registered and non-registered student-patients can search for doctors based on the doctor’s first and last name or a medical issue that may be in either the doctor’s job title (i.e ‘cardiologist’) or in their description (i.e ‘skin’).<br>
+
+**Book an appointment:** Registered student-patients can book appointments with doctors. The appointment is private and can be seen only by the relevant student-patient.<br>
+
+**Review:** Registered student-patients can write reviews for doctors. All registered and non-registered users of the website can see the reviews for any doctor, but only the original poster has edit and delete access.<br>
+
+**Save:** users can save doctors that they like or that they are interested in booking appointments with. The saved doctors appear on their profile page. The students can then unsave the doctor if they want to.<br>
+
+## ER Diagram
+
+![ER Diagram](https://github.com/ayshajamjam/columbiaInsurance/blob/main/Part%201%20Project%20ER%20Diagram.png?raw=true)
 
 To run locally:
 

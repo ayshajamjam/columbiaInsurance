@@ -1,4 +1,4 @@
-# columbiaInsurance
+# Columbia Insurance
 
 [Demo Video](https://youtu.be/acKJ0WZz2Go)
 
